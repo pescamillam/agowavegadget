@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Go Game Wave Gadget" scrolling="true">
+    <Require feature="wave"/>
+    <Require feature="dynamic-height"/>
+  </ModulePrefs>
+  <Content type="html"><![CDATA[
+<link type="text/css" rel="stylesheet" href="http://ago-wave-gadget.googlecode.com/svn/trunk/style.css" />
+<script type="text/javascript">
+  var gfxUrl = 'http://ago-wave-gadget.googlecode.com/svn/trunk/theme/';
+</script>
+<script type="text/javascript" src="http://ago-wave-gadget.googlecode.com/svn/trunk/game.js"></script>
+
+<div id="main">
+ <div id="game">
+  <div id="pw">
+   <div class="bmenu"><a
+     id="result" style="display:none" href="#" onclick="openResult(); return false" title="Show Results">Result</a><a
+     id="pass" href="#" onclick="game.pass(); return false" title="Pass">Pass</a><a
+     id="submit" style="display:none" href="#" onclick="game.submitTry(); return false" title="Submit last try">Submit</a><a
+     id="try" href="#" onclick="game.tryMode(); return false" title="Try move before others see it">Try</a><a
+     id="back" style="display:none" href="#" onclick="game.tryMode(); return false" title="Take back the move you tried">Back</a><a
+     id="play" style="display:none" href="#" onclick="game.play(); return false" title="Continue playing (postpone scoring)">Play</a><a
+     id="new" href="#" onclick="openNew(); return false" title="Start new game">New</a><a
+     id="export" href="#" onclick="openSgfOut(); return false" title="SGF export">Export</a></div>
+   <div id="status"><div id="player"></div><div id="info"></div></div>
+   <div id="ps"></div>
+  </div>
+  <div class="bmenu"><a
+    id="first" href="#" onclick="game.first(); return false" title="Go to start">&#9666;&#9666;</a><a
+    id="prev" href="#" onclick="game.undo(); return false" title="Undo last move">&#9666;</a><a
+    id="next" href="#" onclick="game.redo(); return false" title="Go to next move">&#9656;</a><a
+    id="altnext" href="#" class="dim" onclick="game.down(); return false" title="Go to next alternative move">&#9662;</a><a
+    id="altprev" href="#" class="dim" onclick="game.up(); return false" title="Go to previous alternative move">&#9652;</a><a
+    id="last" href="#" onclick="game.last(); return false" title="Go to end">&#9656;&#9656;</a></div>
+  <div id="bw">
+   <div id="board"></div>
+   <div id="busy"></div>
+  </div>
+ </div>
+
+ <!-- Dialogs -->
+ <div id="divSgfIn" style="display:none">
+  <h4>Copy your SGF here:</h4>
+  <textarea id="txtSgfIn"></textarea>
+  <div class="db"><a
+    class="ok" href="#" onclick="readSgfIn(); return false">Ok</a><a
+    class="close" href="#" onclick="closeAll(); return false">Close</a></div>
+ </div>
+
+ <div id="divSgfOut" style="display:none">
+  <h4>Current game's SGF:</h4>
+  <textarea id="txtSgfOut" readonly="readonly"></textarea>
+  <div class="db"><a
+    class="ok" href="#" onclick="openSgfOut(true); return false" title="Get full game tree in SGF">Full Tree</a><a
+    class="close" href="#" onclick="closeAll(); return false">Close</a></div>
+ </div>
+
+ <div id="divResult" style="display:none">
+  <h4>Game result</h4>
+  <div id="txtResult"></div>
+  <div class="db"><a class="close" href="#" onclick="closeAll(); return false">Close</a></div>
+ </div>
+
+ <div id="divNew" style="display:none">
+  <h4>Select game to play</h4>
+  <div id="txtNew">
+   <p><label for="import">From SGF:</label><a id="import" href="#" onclick="openSgfIn(); return false" title="SGF import">Import</a></p>
+   <p><label for="komi">Komi:</label><input id="komi" type="text" name="komi" value="6.5" maxlength="5" onkeypress="return filterInput(1, event, true)" /></p>
+  </div>
+  <div class="db"><a
+    id="x9" href="#" onclick="newGame(9); return false" title="9x9 Board">9x9</a><a
+    id="x13" href="#" onclick="newGame(13); return false" title="13x13 Board">13x13</a><a
+    id="x19" href="#" onclick="newGame(19); return false" title="19x19 Board">19x19</a><a
+    class="close" href="#" onclick="closeAll(); return false">Close</a></div>
+ </div>
+</div>
+
+<script type="text/javascript">
+  function $new(name, className) {
+    var e = document.createElement(name);
+    if (className)
+      e.className = className;
+    return e;
+  }
+  function $get(id) { return document.getElementById(id); }
+  function $style(id) { return $get(id).style; }
+  function $class(id, name) { $get(id).className = name; }
+  function $visible(id, state, inline) { $style(id).display = state ? (inline ? 'inline-block' : 'block') : 'none'; }
+  function $hide(id) { $visible(id, false); }
+  function $show(id, inline) { $visible(id, true, inline); }
+  function $text(id, text) { $empty(id); $get(id).appendChild(document.createTextNode(text || '')); }
+  function $empty(id) { var node = $get(id); node.parentNode.replaceChild(node.cloneNode(false), node); }
+
+  function newGame(size) {
+    var komi = parseFloat($get('komi').value);
+    game.newGame(size, isNaN(komi) || komi < 0 ? 0 : komi);
+    closeAll();
+  }
+
+  function closeAll() {
+    $hide('divNew');
+    $hide('divSgfIn');
+    $hide('divSgfOut');
+    $hide('divResult');
+  }
+
+  function openNew() {
+    closeAll();
+    $show('divNew');
+  }
+
+  function openSgfIn() {
+    closeAll();
+    $show('divSgfIn');
+    $get('txtSgfIn').focus();
+    $get('txtSgfIn').select();
+  }
+
+  function readSgfIn() {
+    $class('status', '');
+    $text('info', 'SGF imported game');
+    game.importSgf($get('txtSgfIn').value);
+    $hide('divSgfIn');
+  }
+
+  function openSgfOut(full) {
+    closeAll();
+    $get('txtSgfOut').value = game.exportSgf(full);
+    $show('divSgfOut');
+    $get('txtSgfOut').focus();
+    $get('txtSgfOut').select();
+  }
+
+  function openResult() {
+    closeAll();
+    $text('txtResult', game.result());
+    $show('divResult');
+  }
+
+  function filterInput(filterType, evt) {
+    var keyCode;
+    if (window.event) {
+      keyCode = window.event.keyCode;
+      evt = window.event;
+    } else if (evt) {
+      keyCode = evt.which;
+    } else {
+      return true;
+    }
+    if (!keyCode || keyCode == 8 || keyCode == 9 || keyCode == 13 || keyCode == 27)
+      return true;
+    var c = String.fromCharCode(keyCode);
+    if ('0123456789'.indexOf(c) >= 0)
+      return true;
+    var inputField = evt.srcElement ? evt.srcElement : evt.target || evt.currentTarget;
+    return c == '.' && inputField.value.indexOf('.') == -1;
+  }
+
+  function updateBoard(busy, boardImgSize, player, move, info, parsed, navButStates) {
+    $visible('busy', busy);
+    if (boardImgSize) {
+      $style('board').width = boardImgSize + 'px';
+      $style('board').height = boardImgSize + 'px';
+      $style('game').width = boardImgSize + 'px';
+    }
+    if (player == Players.BLACK) {
+      $class('player', 'bplayer');
+    } else if (player == Players.WHITE) {
+      $class('player', 'wplayer');
+    } else {
+      $class('player', 'iplayer');
+    }
+    $class('first', navButStates[0] ? '' : 'dim');
+    $class('prev', navButStates[1] ? '' : 'dim');
+    $class('next', navButStates[2] ? '' : 'dim');
+    $class('altnext', navButStates[3] ? '' : 'dim');
+    $class('altprev', navButStates[4] ? '' : 'dim');
+    $class('last', navButStates[5] ? '' : 'dim');
+    var scoring = game.scoring();
+    var tried = !scoring && game.tried();
+    var trying = !scoring && !tried && game.inTryMode();
+    $visible('result', scoring, true);
+    $visible('pass', !scoring && !tried, true);
+    $class('pass', game.canPlay() ? '' : 'dim');
+    $visible('try', !scoring && !tried && !trying, true);
+    $class('try', game.canPlay() ? '' : 'dim');
+    $visible('play', scoring, true);
+    $visible('submit', tried, true);
+    $visible('back', tried || trying, true);
+    $class('back', tried ? '' : 'dim');
+    if (parsed && $get('status').className == 'error') {
+      // just had beed parsed
+    } else {
+      $class('status', '');
+      if (scoring) {
+        $text('info', game.smallResult() + ' (mark dead stones)');
+      } else if (tried) {
+        $text('info', 'Press "Submit" to confirm');
+      } else if (trying) {
+        $text('info', 'Place a trial stone or pass');
+      } else if (move && move.type == LogEntry.PASS) {
+        $text('info', (move.player == Players.BLACK ? 'Black' : 'White') + ' passed');
+      } else {
+        $text('info', info);
+      }
+    }
+    gadgets.window.adjustHeight();
+  }
+
+  function updatePlayers(players) {
+    var makeColorLink = function(add, id, state, activeClassName, inactiveClassName) {
+      var a = $new('a', state ? activeClassName : inactiveClassName);
+      a.onclick = function() { add.call(players, id, !state); game.submitWaveState(); };
+      a.appendChild($new('span', 'field'));
+      return a;
+    };
+    $empty('ps');
+    var div = $get('ps');
+    var participants = wave.getParticipants();
+    for (var i = 0; i < participants.length; i++) {
+      var id = participants[i].getId();
+      var row = $new('div', 'row');
+      row.appendChild(makeColorLink(players.addWhite, id, players.isWhite(id), 'white', 'nowhite'));
+      row.appendChild(makeColorLink(players.addBlack, id, players.isBlack(id), 'black', 'noblack'));
+      var img = $new('img', '');
+      img.src = participants[i].getThumbnailUrl();
+      img.style.width = '26px';
+      row.appendChild(img);
+      var span = $new('span', 'name');
+      span.appendChild(document.createTextNode(participants[i].getDisplayName()));
+      row.appendChild(span);
+      div.appendChild(row);
+    }
+  }
+
+  function displayError(s) {
+    $class('status', 'error');
+    $text('info', s);
+  }
+
+  var game = new Game(document.getElementById('board'), gfxUrl);
+  game.setBoardUpdateCallback(updateBoard);
+  game.setPlayersUpdateCallback(updatePlayers);
+  game.setErrorCallback(displayError);
+  // sets up the wave gadget callbacks
+  gadgets.util.registerOnLoadHandler(function() {
+    if (wave && wave.isInWaveContainer()) {
+      wave.setParticipantCallback(function() { game.onWaveParticipantChange(); });
+      wave.setStateCallback(function() { game.onWaveStateChange(); });
+    }
+  });
+</script>
+]]>
+  </Content>
+</Module>
