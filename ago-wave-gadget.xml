@@ -5,11 +5,11 @@
     <Require feature="dynamic-height"/>
   </ModulePrefs>
   <Content type="html"><![CDATA[
-<link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/pescamillam/agowavegadget/master/style.css" />
+<link type="text/css" rel="stylesheet" href="https://rawgit.com/pescamillam/agowavegadget/master/style.css" />
 <script type="text/javascript">
-  var gfxUrl = 'https://raw.githubusercontent.com/pescamillam/agowavegadget/master/theme/';
+  var gfxUrl = 'https://rawgit.com/pescamillam/agowavegadget/master/theme/';
 </script>
-<script type="text/javascript" src="https://raw.githubusercontent.com/pescamillam/agowavegadget/master/game.js"></script>
+<script type="text/javascript" src="https://rawgit.com/pescamillam/agowavegadget/master/game.js"></script>
 
 <div id="main">
  <div id="game">
