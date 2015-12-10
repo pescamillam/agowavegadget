@@ -1,0 +1,200 @@
+body { font-size: 78%; }
+textarea { font-size: 11px; }
+
+/* board fields */
+.fieldB, .fieldW, .fieldBlast, .fieldWlast, .fieldBdead, .fieldWdead, .fieldBterr, .fieldWterr, .fieldKo, .fieldNeutral, .fieldEmpty {
+  height: 18px; width: 18px; display: block; position: absolute; background: url(theme/fields.png) 0 -36px no-repeat;
+}
+.fieldB { background-position: 0 0; }
+.fieldW { background-position: 0 -18px; }
+.fieldBlast { background-position: -18px 0; }
+.fieldWlast { background-position: -18px -18px; }
+.fieldBdead { background-position: -36px 0; }
+.fieldWdead { background-position: -36px -18px; }
+.fieldBterr { background-position: -54px 0; }
+.fieldWterr { background-position: -54px -18px; }
+.fieldKo { background-position: -18px -36px; }
+.fieldNeutral { background-position: -54px -36px; }
+
+/* basic layout */
+#main { position: relative; }
+#game { width: 145px; border: 1px solid #C9E2FC; border-top: 0; position: relative; text-align: center; }
+#pw { position: absolute; right: 0; width: 190px; margin: 0 -196px 0 0; text-align: left; border: 1px solid #C9E2FC; border-top: 0; }
+#bw { position: relative; }
+#board { position: relative; margin: 0 auto; text-align: center; width: 145px; height: 100px; }
+#busy {
+  display: none;
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url(images/busy.gif) 50% 50% no-repeat;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* dialogs */
+#divSgfIn, #divSgfOut, #divResult, #divNew {
+  display: none;
+  position: absolute;
+  left: 50%; top: 50%;
+  height: 160px; width: 240px;
+  margin: -80px -120px;
+  overflow: hidden;
+  text-align: center;
+  background: #C9E2FC;
+  -moz-border-radius: 9px;
+  border-radius: 9px;
+  border: 1px solid #5590D2;
+  -webkit-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+  -moz-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+  box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+}
+#divSgfIn h4, #divSgfOut h4, #divResult h4, #divNew h4 {
+  margin: 0 0 6px;
+  padding: 4px 0 2px;
+  text-align: center;
+  font-size: 1em;
+  font-weight: normal;
+  background: #5998DD; color: #FFF;
+  -moz-border-radius: 9px 9px 0 0;
+  border-radius: 9px 9px 0 0;
+  border-top: 1px solid #86B7ED;
+  border-left: 1px solid #86B7ED;
+  border-bottom: 1px solid #5590D2;
+  border-right: 1px solid #5590D2;
+}
+#divResult { height: 120px; width: 200px; margin: -60px -90px; }
+#divNew { height: 110px; width: 200px; margin: -40px -90px; }
+#txtSgfIn, #txtSgfOut { width: 220px; height: 100px; }
+#txtResult { width: 180px; margin: 0 auto; text-align: left; white-space: pre; }
+#txtNew { width: 180px; margin: 0 auto; text-align: center; }
+#txtNew p { margin: 8px 0; padding: 0; }
+#txtNew input { width: 55px; text-align: center; font: 10px Verdana, Arial, sans-serif; }
+#txtNew label { padding-right: 8px; font-size: 0.92em; }
+#txtNew a { margin-top: 0; margin-bottom: -4px; vertical-align: baseline; }
+
+/* players list */
+#ps { margin-top: 2px; border-top: 1px solid #C9E2FC; padding: 0 1px 1px 1px; }
+.row { clear: both; padding-top: 1px; overflow: hidden; }
+.white, .black, .nowhite, .noblack {
+  display: block; float: right; position: relative;
+  width: 22px; height: 22px;
+  margin: 1px;
+  border: 1px solid #5590D2;
+  cursor: pointer;
+}
+.black, .white { background: #FEFF70; }
+.noblack { background: #555; }
+.nowhite { background: #BBB; }
+.black .field, .white .field, .noblack .field, .nowhite .field {
+  display: block; position: absolute;
+  height: 18px; width: 18px;
+  top: 50%; left: 50%;
+  margin: -9px;
+  background: url(theme/fields.png) 0 0 no-repeat;
+}
+.black .field { background-position: 0 0; }
+.white .field { background-position: 0 -18px; }
+.noblack .field { background-position: -54px 0; }
+.nowhite .field { background-position: -54px -18px; }
+.name { float: right; height: 26px; line-height: 26px; width: 100px; padding: 0 3px; color: #666; }
+
+/* status line */
+#status {
+  position: relative;
+  height: 18px; line-height: 18px;
+  margin: 0 0 1px;
+  padding-left: 22px;
+  background: #FFD;
+  border: 1px solid #FEC;
+  color: #000;
+  font-size: 0.92em;
+}
+#status .bplayer, #status .wplayer, #status .iplayer {
+  position: absolute; left: 0; top: 0; width: 18px; height: 18px; background: url(theme/fields.png) -54px -36px no-repeat;
+}
+#status .bplayer { background-position: 0 0; }
+#status .wplayer { background-position: 0 -18px; }
+#status.error { background-color: #D30; color: #FFF; border-color: #F63; }
+#status.error .bplayer { background-position: -18px 0; }
+#status.error .wplayer { background-position: -18px -18px; }
+#status.error .iplayer { background-position: -18px -36px; }
+
+/* control buttons */
+.db { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; }
+.bmenu { text-align: center; border-top: 1px solid #C9E2FC; margin-bottom: 2px; }
+#first, #prev, #next, #altnext, #altprev, #last, #tree, .ok, .close, #pass, #result, #new, #export, #import, #x9, #x13, #x19, #try, #submit, #back, #play,
+.button {
+  display: inline-block;
+  vertical-align: baseline;
+  margin: 2px 1px;
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  font: 11px/100% Arial, Helvetica, sans-serif;
+  padding: 2px 5px 3px;
+  text-shadow: 1px 1px 1px rgba(255,255,255,.5);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.3);
+  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,.3);
+  /* color */
+  color: #222;
+  border: solid 1px #888;
+  background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFF), to(#CCC));
+  background: -moz-linear-gradient(top,  #FFF,  #CCC);
+}
+.ok, .close { margin-left: 3px; margin-right: 3px; padding-left: 8px; padding-right: 8px; }
+#first:hover, #prev:hover, #next:hover, #altnext:hover, #altprev:hover, #last:hover, #tree:hover, .ok:hover, .close:hover, #pass:hover, #result:hover, #new:hover, #export:hover, #import:hover, #x9:hover, #x13:hover, #x19:hover, #try:hover, #submit:hover, #back:hover, #play:hover,
+.button:hover {
+  color: #000;
+  background: #DDD;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFF), to(#AAA));
+  background: -moz-linear-gradient(top,  #FFF,  #AAA);
+}
+#first:active, #prev:active, #next:active, #altnext:active, #altprev:active, #last:active, #tree:active, .ok:active, .close:active, #pass:active, #result:active, #new:active, #export:active, #import:active, #x9:active, #x13:active, #x19:active, #try:active, #submit:active, #back:active, #play:active,
+.button:active {
+  color: #333;
+  background: -webkit-gradient(linear, left top, left bottom, from(#CCC), to(#FFF));
+  background: -moz-linear-gradient(top,  #CCC,  #FFF);
+  -webkit-box-shadow: 0 0 0 rgba(0,0,0,.3);
+  -moz-box-shadow: 0 0 0 rgba(0,0,0,.3);
+  box-shadow: 0 0 0 rgba(0,0,0,.3);
+}
+.rounded { -webkit-border-radius: 11px; -moz-border-radius: 11px; border-radius: 11px; padding-left: 7px; padding-right: 7px; }
+
+#new, #export, #import,
+.orange {
+  color: #222;
+  border: solid 1px #da7c0c;
+  background: #F93;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FC4), to(#F93));
+  background: -moz-linear-gradient(top,  #FC4,  #F93);
+}
+#new:hover, #export:hover, #import:hover,
+.orange:hover {
+  background: #F82;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FC4), to(#F82));
+  background: -moz-linear-gradient(top,  #FC4,  #F82);
+}
+#new:active, #export:active, #import:active,
+.orange:active {
+  color: #222;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F93), to(#FC4));
+  background: -moz-linear-gradient(top,  #F93,  #FC4);
+}
+
+.dim, .dim:hover, .dim:active {
+  color: #555 !important;
+  text-shadow: 1px 1px 1px #DDD !important;
+  border: solid 1px #555 !important;
+  background: #CCC !important;
+  background: -webkit-gradient(linear, left top, left bottom, from(#DDD), to(#BBB)) !important;
+  background: -moz-linear-gradient(top,  #DDD,  #BBB) !important;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.3) !important;
+  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.3) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.3) !important;
+  cursor: default !important;
+}
